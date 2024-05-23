@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spacex/models/rocket_details_model.dart';
 import 'package:spacex/models/rocket_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:spacex/utils/apis.dart';
-import 'package:spacex/utils/my_colors.dart';
+
 
 class ApiService {
   //fetch List of rockets fucntion here
@@ -17,9 +17,6 @@ class ApiService {
         List data = responseData;
         return data.map((e) => RocketModel.fromJson(e)).toList();
       } else {
-        Get.snackbar("", responseData["message"].toString(),
-            backgroundColor: MyColors.blackColor,
-            colorText: MyColors.whiteColor);
         return [];
       }
     } catch (e) {
@@ -39,9 +36,6 @@ class ApiService {
             RocketDetailsModel.fromJson(responseData);
         return rocketDetailsModel;
       } else {
-        Get.snackbar("", responseData["message"].toString(),
-            backgroundColor: MyColors.blackColor,
-            colorText: MyColors.whiteColor);
         return RocketDetailsModel();
       }
     } catch (e) {
@@ -49,3 +43,5 @@ class ApiService {
     }
   }
 }
+
+final rocketProvider = Provider<ApiService>((ref) => ApiService());

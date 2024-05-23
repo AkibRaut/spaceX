@@ -1,70 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:spacex/controllers/rockets_controller.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spacex/data_provider/data_provider.dart';
+import 'package:spacex/models/rocket_model.dart';
 import 'package:spacex/screens/rocket_details_screen.dart';
+
 import 'package:spacex/utils/my_colors.dart';
 
-class RocketsScreen extends StatelessWidget {
+class RocketsScreen extends ConsumerWidget {
   const RocketsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final data = ref.watch(rocketDataProvier);
     final size = MediaQuery.sizeOf(context);
-    final controller = Get.put(RocketsController());
+
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: MyColors.darkbluecolor,
-        title: Text(
-          "SpaceX",
-          style: TextStyle(
-              fontSize: size.width * .045,
-              fontWeight: FontWeight.w600,
-              fontFamily: "poppins",
-              color: MyColors.whiteColor),
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: MyColors.darkbluecolor,
+          title: Text(
+            "SpaceX",
+            style: TextStyle(
+                fontSize: size.width * .045,
+                fontWeight: FontWeight.w600,
+                fontFamily: "poppins",
+                color: MyColors.whiteColor),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Rockets",
-                  style: TextStyle(
-                    fontSize: size.width * .055,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: "poppins",
+        body: data.when(
+          data: (data) {
+            List<RocketModel> rocketList = data.map((e) => e).toList();
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Rockets",
+                      style: TextStyle(
+                        fontSize: size.width * .055,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: "poppins",
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Obx(
-                () => controller.isLoading.value
-                    ? const CircularProgressIndicator.adaptive()
-                    : controller.rocketList.isEmpty
-                        ? Text(
-                            "Rockets Not Founds !!",
-                            style: TextStyle(
-                              fontSize: size.width * .055,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: "poppins",
-                            ),
-                          )
-                        : Expanded(
-                            child: ListView.builder(
-                              itemCount: controller.rocketList.length,
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) => Padding(
+                  Expanded(
+                      child: ListView.builder(
+                          itemCount: rocketList.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) => Padding(
                                 padding: const EdgeInsets.only(top: 8),
                                 child: InkWell(
                                   onTap: () {
-                                    Get.to(() => RocketDetailsScreen(
-                                        rocketId: controller
-                                            .rocketList[index].id
-                                            .toString()));
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                RocketDetailsScreen(
+                                                    rocketId: rocketList[index]
+                                                        .id
+                                                        .toString())));
+                                    // Get.to(() => RocketDetailsScreen(
+                                    //     rocketId: rocketList[index].id
+                                    //         .toString()));
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
@@ -85,14 +84,15 @@ class RocketsScreen extends StatelessWidget {
                                                         Radius.circular(10),
                                                     topRight:
                                                         Radius.circular(10)),
-                                            child: Image.network(controller
-                                                    .rocketList[index]
+                                            child: Image.network(rocketList[
+                                                        index]
                                                     .flickrImages!
                                                     .first
                                                     .isEmpty
                                                 ? "https://farm1.staticflickr.com/293/32312415025_6841e30bf1_b.jpg"
-                                                : controller.rocketList[index]
-                                                    .flickrImages!.first
+                                                : rocketList[index]
+                                                    .flickrImages!
+                                                    .first
                                                     .toString()),
                                           ),
                                           const SizedBox(height: 10),
@@ -103,12 +103,10 @@ class RocketsScreen extends StatelessWidget {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  controller.rocketList[index]
-                                                              .name ==
+                                                  rocketList[index].name ==
                                                           "null"
                                                       ? ""
-                                                      : controller
-                                                          .rocketList[index]
+                                                      : rocketList[index]
                                                           .name
                                                           .toString(),
                                                   style: TextStyle(
@@ -125,7 +123,7 @@ class RocketsScreen extends StatelessWidget {
                                                   maxLines: 1,
                                                   overflow:
                                                       TextOverflow.ellipsis,
-                                                  "Origin : ${controller.rocketList[index].country == "null" ? "" : controller.rocketList[index].country.toString()}",
+                                                  "Origin : ${rocketList[index].country == "null" ? "" : rocketList[index].country.toString()}",
                                                   style: TextStyle(
                                                       fontSize:
                                                           size.width * .037,
@@ -137,7 +135,7 @@ class RocketsScreen extends StatelessWidget {
                                                 ),
                                                 const SizedBox(height: 5),
                                                 Text(
-                                                  "Engine : ${controller.rocketList[index].stages! == "null" ? "" : controller.rocketList[index].stages.toString()}",
+                                                  "Engine : ${rocketList[index].stages! == "null" ? "" : rocketList[index].stages.toString()}",
                                                   style: TextStyle(
                                                     fontSize: size.width * .037,
                                                     fontWeight: FontWeight.w600,
@@ -147,7 +145,7 @@ class RocketsScreen extends StatelessWidget {
                                                 ),
                                                 const SizedBox(height: 5),
                                                 Text(
-                                                  "company : ${controller.rocketList[index].company! == "null" ? "" : controller.rocketList[index].company.toString()}",
+                                                  "company : ${rocketList[index].company! == "null" ? "" : rocketList[index].company.toString()}",
                                                   style: TextStyle(
                                                     fontSize: size.width * .037,
                                                     fontWeight: FontWeight.w600,
@@ -163,14 +161,23 @@ class RocketsScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ),
-              )
-            ],
+                              )))
+                ],
+              ),
+            );
+          },
+          error: (error, stackTrace) => Text(
+            "Rockets Not Found",
+            style: TextStyle(
+              color: MyColors.redcolor,
+              fontSize: size.width * .035,
+              fontWeight: FontWeight.bold,
+              fontFamily: "poppins",
+            ),
           ),
-        ),
-      ),
-    );
+          loading: () => const Center(
+            child: CircularProgressIndicator.adaptive(),
+          ),
+        ));
   }
 }

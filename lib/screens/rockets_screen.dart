@@ -92,10 +92,24 @@ class RocketsScreen extends ConsumerWidget {
                                                         Radius.circular(10)),
                                             child: internet.asData!.value ==
                                                     false
-                                                ? Image.memory(base64Decode(
-                                                    rocketList[index]
-                                                        .flickrImages2![index]
-                                                        .toString()))
+                                                ? rocketList[index]
+                                                            .flickrImages2 ==
+                                                        null
+                                                    ? Text(
+                                                        "Image Not Found",
+                                                        style: TextStyle(
+                                                          fontSize:
+                                                              size.width * .037,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontFamily: "poppins",
+                                                        ),
+                                                      )
+                                                    : Image.memory(base64Decode(
+                                                        rocketList[index]
+                                                            .flickrImages2![
+                                                                index]
+                                                            .toString()))
                                                 : Image.network(rocketList[
                                                             index]
                                                         .flickrImages!

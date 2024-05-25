@@ -1,47 +1,50 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:spacex/models/rocket_details_model.dart';
 import 'package:spacex/models/rocket_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:spacex/services/database_handler.dart';
 import 'package:spacex/utils/apis.dart';
 
-
 class ApiService {
+  DBHandeler dbHandeler = DBHandeler();
+
+//check Internet connection
+  Future<bool> hasNetwork() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
   //fetch List of rockets fucntion here
   Future<List<RocketModel>> getAllRockets() async {
     try {
-      final uri = Uri.parse(Apis.baseurl);
-      final response = await http.get(uri);
-      final responseData = json.decode(response.body);
-      if (responseData != null) {
-        List data = responseData;
-        return data.map((e) => RocketModel.fromJson(e)).toList();
+      bool isconnected = await hasNetwork();
+
+      if (isconnected == true) {
+        final uri = Uri.parse(Apis.baseurl);
+        final response = await http.get(uri);
+        final responseData = json.decode(response.body);
+        if (responseData != null) {
+          List data = responseData;
+          return data.map((e) => RocketModel.fromJson(e)).toList();
+        } else {
+          return [];
+        }
       } else {
-        return [];
+        List<RocketModel> rocketList = await dbHandeler.readdata();
+
+        return rocketList;
       }
     } catch (e) {
       return [];
     }
   }
-
-  //fetch details of rockets fucntion here from id of rocket
-
-  Future<RocketDetailsModel> getRocketDetails({required String id}) async {
-    try {
-      final uri = Uri.parse("${Apis.rocketsDetailsApi}/$id");
-      final response = await http.get(uri);
-      final responseData = json.decode(response.body);
-      if (responseData != null) {
-        RocketDetailsModel rocketDetailsModel =
-            RocketDetailsModel.fromJson(responseData);
-        return rocketDetailsModel;
-      } else {
-        return RocketDetailsModel();
-      }
-    } catch (e) {
-      return RocketDetailsModel();
-    }
-  }
 }
 
+
+//make access global for provider
 final rocketProvider = Provider<ApiService>((ref) => ApiService());

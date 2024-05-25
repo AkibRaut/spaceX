@@ -1,9 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spacex/data_provider/data_provider.dart';
 import 'package:spacex/models/rocket_model.dart';
 import 'package:spacex/screens/rocket_details_screen.dart';
-
+import 'package:spacex/services/database_handler.dart';
 import 'package:spacex/utils/my_colors.dart';
 
 class RocketsScreen extends ConsumerWidget {
@@ -13,7 +14,8 @@ class RocketsScreen extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final data = ref.watch(rocketDataProvier);
     final size = MediaQuery.sizeOf(context);
-
+    final internet = ref.watch(internetProvider);
+    DBHandeler dbHandeler = DBHandeler();
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -30,6 +32,12 @@ class RocketsScreen extends ConsumerWidget {
         body: data.when(
           data: (data) {
             List<RocketModel> rocketList = data.map((e) => e).toList();
+            if (internet.value == true) {
+              for (int i = 0; i < rocketList.length; i++) {
+                dbHandeler.insertData(rocketList[i]);
+              }
+            }
+
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -58,12 +66,10 @@ class RocketsScreen extends ConsumerWidget {
                                         MaterialPageRoute(
                                             builder: (context) =>
                                                 RocketDetailsScreen(
-                                                    rocketId: rocketList[index]
-                                                        .id
-                                                        .toString())));
-                                    // Get.to(() => RocketDetailsScreen(
-                                    //     rocketId: rocketList[index].id
-                                    //         .toString()));
+                                                  isOnline: internet.value!,
+                                                  rocketDetails:
+                                                      rocketList[index],
+                                                )));
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
@@ -84,16 +90,22 @@ class RocketsScreen extends ConsumerWidget {
                                                         Radius.circular(10),
                                                     topRight:
                                                         Radius.circular(10)),
-                                            child: Image.network(rocketList[
-                                                        index]
-                                                    .flickrImages!
-                                                    .first
-                                                    .isEmpty
-                                                ? "https://farm1.staticflickr.com/293/32312415025_6841e30bf1_b.jpg"
-                                                : rocketList[index]
-                                                    .flickrImages!
-                                                    .first
-                                                    .toString()),
+                                            child: internet.asData!.value ==
+                                                    false
+                                                ? Image.memory(base64Decode(
+                                                    rocketList[index]
+                                                        .flickrImages2![index]
+                                                        .toString()))
+                                                : Image.network(rocketList[
+                                                            index]
+                                                        .flickrImages!
+                                                        .first
+                                                        .isEmpty
+                                                    ? "https://farm1.staticflickr.com/293/32312415025_6841e30bf1_b.jpg"
+                                                    : rocketList[index]
+                                                        .flickrImages!
+                                                        .first
+                                                        .toString()),
                                           ),
                                           const SizedBox(height: 10),
                                           Padding(

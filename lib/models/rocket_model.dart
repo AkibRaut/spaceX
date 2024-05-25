@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class RocketModel {
   Diameter? height;
   Diameter? diameter;
@@ -7,11 +9,14 @@ class RocketModel {
   Engines? engines;
   LandingLegs? landingLegs;
   List<PayloadWeights>? payloadWeights;
-  List<String>? flickrImages;
+  List<dynamic>? flickrImages;
+  List<dynamic>? flickrImages2;
   String? name;
   String? type;
-  bool? active;
+  String? active;
   String? stages;
+  String? heightFeet;
+  String? diameterFeet;
   String? boosters;
   String? costPerLaunch;
   String? successRatePct;
@@ -34,6 +39,8 @@ class RocketModel {
       this.flickrImages,
       this.name,
       this.type,
+      this.heightFeet,
+      this.diameterFeet,
       this.active,
       this.stages,
       this.boosters,
@@ -68,10 +75,15 @@ class RocketModel {
         payloadWeights!.add(PayloadWeights.fromJson(v));
       });
     }
-    flickrImages = json['flickr_images'].cast<String>();
+    flickrImages2 = json['flickrimages'] != null
+        ? List<String>.from(jsonDecode(json['flickrimages']))
+        : null;
+    flickrImages = json['flickr_images'];
     name = json['name'];
     type = json['type'];
-    active = json['active'];
+    heightFeet = json['heightFeet'];
+    diameterFeet = json['diameterFeet'];
+    active = json['active'].toString();
     stages = json['stages'].toString();
     boosters = json['boosters'].toString();
     costPerLaunch = json['cost_per_launch'].toString();
@@ -188,7 +200,7 @@ class Mass {
 class FirstStage {
   ThrustSeaLevel? thrustSeaLevel;
   ThrustSeaLevel? thrustVacuum;
-  bool? reusable;
+  String? reusable;
   String? engines;
   String? fuelAmountTons;
   String? burnTimeSec;
@@ -208,7 +220,7 @@ class FirstStage {
     thrustVacuum = json['thrust_vacuum'] != null
         ? ThrustSeaLevel.fromJson(json['thrust_vacuum'])
         : null;
-    reusable = json['reusable'];
+    reusable = json['reusable'].toString();
     engines = json['engines'].toString();
     fuelAmountTons = json['fuel_amount_tons'].toString();
     burnTimeSec = json['burn_time_sec'].toString();
@@ -252,7 +264,7 @@ class ThrustSeaLevel {
 class SecondStage {
   ThrustSeaLevel? thrust;
   Payloads? payloads;
-  bool? reusable;
+  String? reusable;
   String? engines;
   String? fuelAmountTons;
   String? burnTimeSec;
@@ -270,7 +282,7 @@ class SecondStage {
         json['thrust'] != null ? ThrustSeaLevel.fromJson(json['thrust']) : null;
     payloads =
         json['payloads'] != null ? Payloads.fromJson(json['payloads']) : null;
-    reusable = json['reusable'];
+    reusable = json['reusable'].toString();
     engines = json['engines'].toString();
     fuelAmountTons = json['fuel_amount_tons'].toString();
     burnTimeSec = json['burn_time_sec'].toString();
